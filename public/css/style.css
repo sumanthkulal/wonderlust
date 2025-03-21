@@ -4,7 +4,7 @@ body{
     flex-direction: column !important;
     min-height: 100vh !important;
 }
-.container{
+.container{ 
     flex: 1 !important;
 }
 .navbar{
