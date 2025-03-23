@@ -7,7 +7,8 @@ const path=require("path");
 const ejsMate=require("ejs-mate"); 
 const wrapAsync=require("./utils/wrapAsync.js");
 const ExpressError=require("./utils/ExpressError");
-const {listingSchema}=require("./schema.js")
+const {listingSchema,reviewSchema}=require("./schema.js")
+const Review=require("./models/review.js");
 
 
 app.set("view engine","ejs");
@@ -40,6 +41,17 @@ const validateListing=(req,res,next)=>{
     }
 }
 
+const validateReview=(req,res,next)=>{
+    let {error}=reviewSchema.validate(req.body);
+    if(error)
+        {
+            throw new ExpressError(400,error);
+        }
+        else{
+            next();
+        }
+}
+
 app.get("/listings",wrapAsync(async (req,res)=>{
     let allListings=await Listing.find({});
     res.render("listings/index.ejs",{allListings});
@@ -49,9 +61,10 @@ app.get("/listings/new",(req,res)=>{
         res.render("listings/new.ejs");
 });
 
+//show route
 app.get("/listings/:id",wrapAsync(async (req,res)=>{
     let {id}=req.params;
-    const listing=await Listing.findById(id);
+    const listing=await Listing.findById(id).populate("reviews");
     res.render("listings/show.ejs",{listing});
 }))
 
@@ -104,8 +117,29 @@ app.delete("/listings/:id",wrapAsync(async (req,res)=>{
     res.redirect("/listings");
 }))
 
+//review
+app.post("/listings/:id/reviews",validateReview,wrapAsync(async(req,res)=>
+{
+    let listing=await Listing.findById(req.params.id)
+    let newReview=new Review(req.body.review)
+    await newReview.save();
+   await listing.reviews.push(newReview)
+    
+    await listing.save();
+    res.redirect(`/listings/${listing._id}`);
+} ))
+
+app.delete("/listings/:id/reviews/:reviewId",wrapAsync(async(req,res)=>{
+    // res.send("it WORKS")
+    let {id,reviewId}=req.params
+    await Listing.findByIdAndUpdate(id,{$pull:{reviews:reviewId}})
+    await Review.findByIdAndDelete(reviewId)
+    res.redirect(`/listings/${id}`);
+}))
+
+
 app.get("/",(req,res)=>{
-    res.send("hi i am in root");
+    res.send("Welocome To Wonderlust");
 })
 app.all("*",(req,res,next)=>{
     next(new ExpressError(404,"Page Not Found"));
