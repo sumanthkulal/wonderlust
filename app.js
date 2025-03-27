@@ -55,7 +55,7 @@ app.get("/",(req,res)=>{
 
 app.use(session(sessionOptions))
 app.use(flash())
-app.use(passport.initialize())
+app.use(passport.initialize()) 
 app.use(passport.session())
 passport.use(new LocalStatergy(User.authenticate()))
 passport.serializeUser(User.serializeUser());
@@ -64,6 +64,7 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success") || [];
     res.locals.error = req.flash("error") || [];
+    res.locals.curUser=req.user
     next()
 })
 app.use("/listings",listingsRouter)
