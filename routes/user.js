@@ -36,15 +36,32 @@ router.post("/signup",wrapAsync(async(req,res)=>{
 router.get("/login",(req,res)=>{
     res.render("users/login.ejs")
 })
-router.post("/login",saveRedirectUrl,passport.authenticate("local",
-    {failureRedirect:"/login",failureFlash:true}),
-    async(req,res)=>{ 
-        req.flash("success","Welcome back to Wonderlust");
-        let redirect=res.locals.redirectUrl || "/listings"
-        res.redirect(redirect)
+// router.post("/login",saveRedirectUrl,passport.authenticate("local",
+//     {failureRedirect:"/login",failureFlash:true}),
+//     async(req,res)=>{ 
+//         req.flash("success","Welcome back to Wonderlust");
+//         let redirect=res.locals.redirectUrl || "/listings"
+//         res.redirect(redirect)
 
+//     }
+// )
+
+router.post("/login", saveRedirectUrl, passport.authenticate("local",
+    { failureRedirect: "/login", failureFlash: true }),
+    async (req, res) => {
+        req.flash("success", "Welcome back to Wonderlust");
+
+        let redirect = res.locals.redirectUrl || "/listings";
+
+        // Check if the redirect URL contains "_method=DELETE"
+        if (redirect.includes("_method=DELETE")) {
+            // Extract the base listing URL (everything before "/reviews/")
+            redirect = redirect.split("/reviews/")[0];
+        }
+        res.redirect(redirect);
     }
-)
+);
+
 
 router.get("/logout",(req,res,next)=>{
     req.logOut((err)=>{

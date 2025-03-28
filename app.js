@@ -14,7 +14,8 @@ const session=require("express-session");
 const flash=require("express-flash");
 
 const passport=require("passport")
-const LocalStatergy=require("passport-local")
+const LocalStrategy=require("passport-local")
+
 const User=require("./models/user.js")
 
 
@@ -57,7 +58,7 @@ app.use(session(sessionOptions))
 app.use(flash())
 app.use(passport.initialize()) 
 app.use(passport.session())
-passport.use(new LocalStatergy(User.authenticate()))
+passport.use(new LocalStrategy(User.authenticate()))
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());   
 
