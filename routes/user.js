@@ -4,74 +4,16 @@ const User=require("../models/user.js");
 const wrapAsync = require("../utils/wrapAsync.js");
 const passport = require("passport");
 const { saveRedirectUrl } = require("../middleware.js");
+const userController=require("../controllers/users.js");
+const { render } = require("ejs");
 
+router.route("/signup").get(userController.renderSignupForm)
+.post(wrapAsync(userController.signup))
 
-router.get("/signup",(req,res)=>{
-    res.render("users/signup.ejs")
-})
+router.route("/login").get(userController.renderLoginForm)
+.post( saveRedirectUrl, passport.authenticate("local",
+    { failureRedirect: "/login", failureFlash: true }),userController.login);
 
-router.post("/signup",wrapAsync(async(req,res)=>{
-    try{
-        let {email,username,password}=req.body;
-        const newUser=new User({email,username})
-        let registredUser=await User.register(newUser,password)
-        // console.log(registredUser)
-        req.login(registredUser,(err)=>{
-            if(err)
-            {
-                return next(err)
-            }
-            req.flash("success","Welcome To WonderLust")
-            res.redirect("/listings")
-        })
-        
-    } catch(e)
-    {
-        req.flash("error",e.message)
-        res.redirect("/signup");
-    }
-    
-}))
-
-router.get("/login",(req,res)=>{
-    res.render("users/login.ejs")
-})
-// router.post("/login",saveRedirectUrl,passport.authenticate("local",
-//     {failureRedirect:"/login",failureFlash:true}),
-//     async(req,res)=>{ 
-//         req.flash("success","Welcome back to Wonderlust");
-//         let redirect=res.locals.redirectUrl || "/listings"
-//         res.redirect(redirect)
-
-//     }
-// )
-
-router.post("/login", saveRedirectUrl, passport.authenticate("local",
-    { failureRedirect: "/login", failureFlash: true }),
-    async (req, res) => {
-        req.flash("success", "Welcome back to Wonderlust");
-
-        let redirect = res.locals.redirectUrl || "/listings";
-
-        // Check if the redirect URL contains "_method=DELETE"
-        if (redirect.includes("_method=DELETE")) {
-            // Extract the base listing URL (everything before "/reviews/")
-            redirect = redirect.split("/reviews/")[0];
-        }
-        res.redirect(redirect);
-    }
-);
-
-
-router.get("/logout",(req,res,next)=>{
-    req.logOut((err)=>{
-        if(err)
-        {
-            return next(err)
-        }
-        req.flash("success","you are logged out")
-        res.redirect("/listings");
-    })
-})
+router.get("/logout",userController.logout)
 
 module.exports=router
