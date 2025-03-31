@@ -53,10 +53,6 @@ const sessionOptions={
     }
 }
 
-app.get("/",(req,res)=>{
-    res.send("Welocome To Wonderlust");
-})
-
 app.use(session(sessionOptions))
 app.use(flash())
 app.use(passport.initialize()) 
