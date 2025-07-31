@@ -68,5 +68,5 @@ Only the user who listed a property can edit or delete it. Reviews can also be a
 
 Made with ❤️ by **Sumanth Kulal**
 
-- 💼 [LinkedIn](www.linkedin.com/in/sumanth-kulal)
+- 💼 LinkedIn: www.linkedin.com/in/sumanth-kulal
 - 📧 Email: sumanthkulal2005@gmail.com
